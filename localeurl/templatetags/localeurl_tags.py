@@ -1,5 +1,8 @@
 from django import template
-from django.template import Node, Token, TemplateSyntaxError
+try:
+    from django.template import Node, Token, TemplateSyntaxError
+except:
+    from django.template.base import Node, Token, TemplateSyntaxError
 from django.template import resolve_variable
 from django.template.defaultfilters import stringfilter
 from django.templatetags import future

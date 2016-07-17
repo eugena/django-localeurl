@@ -76,6 +76,8 @@ class LocaleURLMiddleware(object):
                 locale = request.LANGUAGE_CODE
             except AttributeError:
                 locale = settings.LANGUAGE_CODE
+        if localeurl_settings.USE_SESSION:
+            request.session['django_language'] = locale
         translation.activate(locale)
         request.LANGUAGE_CODE = translation.get_language()
 

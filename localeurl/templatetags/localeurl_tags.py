@@ -3,9 +3,17 @@ try:
     from django.template import Node, Token, TemplateSyntaxError
 except:
     from django.template.base import Node, Token, TemplateSyntaxError
-from django.template import resolve_variable
+try:
+    from django.template import resolve_variable
+except ImportError:
+    from django.template.base import Variable
+
 from django.template.defaultfilters import stringfilter
-from django.templatetags import future
+
+try:
+    from django.template.defaulttags import url
+except ImportError:
+    from django.templatetags.future import url
 
 from localeurl import utils
 
@@ -55,7 +63,7 @@ def locale_url(parser, token):
         raise TemplateSyntaxError("'%s' takes at least two arguments:"
                 " the locale and a view" % bits[0])
     urltoken = Token(token.token_type, bits[0] + ' ' + ' '.join(bits[2:]))
-    urlnode = future.url(parser, urltoken)
+    urlnode = url(parser, urltoken)
     return LocaleURLNode(bits[1], urlnode)
 
 
@@ -65,7 +73,10 @@ class LocaleURLNode(Node):
         self.urlnode = urlnode
 
     def render(self, context):
-        locale = resolve_variable(self.locale, context)
+        try:
+            locale = resolve_variable(self.locale, context)
+        except:
+            locale = Variable(self.locale).resolve(context)
         if utils.supported_language(locale) is None:
             raise ValueError("locale not in settings.LANGUAGES: %s" % locale)
         path = self.urlnode.render(context)
